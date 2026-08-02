@@ -1,0 +1,85 @@
+# Log Generator Settings
+generator:
+  events_per_second: 100
+  duration_seconds: 60
+
+
+# Device Distribution
+devices:
+  firewall: 40
+  switch: 30
+  server: 30
+
+# Device Name
+device_names:
+
+  firewall:
+    - fw-seoul-01
+    - fw-seoul-02
+    - fw-busan-01
+
+  switch:
+    - sw-seoul-01
+    - sw-seoul-02
+
+  server:
+    - server-seoul-01
+    - server-busan-01
+
+
+# Firewall Events
+events:
+
+  firewall:
+    - ALLOW
+    - DENY
+    - DROP
+    - PORT_SCAN
+    - DDOS_DETECTED
+
+
+  switch:
+    - PORT_UP
+    - PORT_DOWN
+    - VLAN_CHANGED
+    - MAC_LEARNED
+
+
+  server:
+    - LOGIN_SUCCESS
+    - LOGIN_FAIL
+    - PROCESS_START
+    - PROCESS_STOP
+
+
+
+# Network Data Settings
+network:
+
+  protocols:
+    - TCP
+    - UDP
+    - ICMP
+
+
+  common_ports:
+    - 22
+    - 80
+    - 443
+    - 3306
+
+
+# Socket Output
+output:
+  type: socket
+
+
+# Kafka (Future)
+kafka:
+
+  enabled: false
+
+  bootstrap_servers:
+    - localhost:9092
+
+  topic: network-logs

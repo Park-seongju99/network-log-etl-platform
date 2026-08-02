@@ -1,0 +1,85 @@
+services:
+
+  # Network Log Generator
+  generator:
+    build:
+      context: ./generator
+
+    container_name: ${PROJECT_NAME}-generator
+
+    environment:
+      NIFI_HOST: ${NIFI_HOST}
+      NIFI_TCP_PORT: ${NIFI_TCP_PORT}
+
+    depends_on:
+      - nifi
+
+    networks:
+      - network-platform
+
+    restart: unless-stopped
+
+
+
+  # Apache NiFi
+  nifi:
+    image: apache/nifi:latest
+
+    container_name: ${PROJECT_NAME}-nifi
+
+    ports:
+      - "${NIFI_HTTPS_PORT}:8443"
+      - "${NIFI_TCP_PORT}:7070"
+
+    volumes:
+      # 내 컴퓨터의 jar 파일을 컨테이너의 /tmp로 연결
+      - ./mysql-connector-j-8.3.0.jar:/tmp/mysql-connector-j-8.3.0.jar
+
+    environment:
+      SINGLE_USER_CREDENTIALS_USERNAME: ${NIFI_USERNAME}
+      SINGLE_USER_CREDENTIALS_PASSWORD: ${NIFI_PASSWORD}
+      NIFI_WEB_PROXY_HOST: ${NIFI_PROXY_HOST}
+
+    networks:
+      - network-platform
+
+    restart: unless-stopped
+
+
+
+  # MySQL
+  mysql:
+    image: mysql:8.0
+
+    container_name: ${PROJECT_NAME}-mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    ports:
+      - "${MYSQL_PORT}:3306"
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+
+    networks:
+      - network-platform
+
+    restart: unless-stopped
+
+
+
+networks:
+
+  network-platform:
+    driver: bridge
+
+
+
+volumes:
+
+  mysql-data:

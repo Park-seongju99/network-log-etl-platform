@@ -1,0 +1,40 @@
+# 1. 환경 변수 및 보안 파일
+.env
+.env.*
+standalone_admin_password.txt
+
+# 2. Python 관련 (로그 제너레이터 실행 및 테스트 시 생기는 파일들)
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+*.egg-info/
+
+# 3. 라이브러리 및 바이너리 (아까 다운받은 드라이버 등)
+*.jar
+
+# 4. Docker 볼륨, Airflow 및 데이터 (컨테이너 실행 시 로컬에 마운트된 데이터베이스나 로그)
+mysql_data/
+nifi_data/
+nifi_logs/
+logs/
+*.log
+airflow.db
+airflow.cfg
+airflow-webserver.pid
+docker-compose.override.yml
+
+# 5. OS 및 에디터 설정 파일 (개인 작업 환경 파일)
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+.history/
