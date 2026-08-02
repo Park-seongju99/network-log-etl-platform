@@ -95,6 +95,7 @@ services:
     restart: unless-stopped
 
   # 2. Airflow 초기 셋팅 (최초 1회 실행 후 종료됨)
+  # 2. Airflow 초기 셋팅
   airflow-init:
     image: apache/airflow:2.7.3
     container_name: ${PROJECT_NAME}-airflow-init
@@ -105,8 +106,8 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - _AIRFLOW_DB_UPGRADE=true
       - _AIRFLOW_WWW_USER_CREATE=true
-      - _AIRFLOW_WWW_USER_USERNAME=admin # Airflow 웹 로그인 ID
-      - _AIRFLOW_WWW_USER_PASSWORD=admin # Airflow 웹 로그인 PW
+      - _AIRFLOW_WWW_USER_USERNAME=${AIRFLOW_ADMIN_USER}
+      - _AIRFLOW_WWW_USER_PASSWORD=${AIRFLOW_ADMIN_PASSWORD}
     command: version
     networks:
       - network-platform
