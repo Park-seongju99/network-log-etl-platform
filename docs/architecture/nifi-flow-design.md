@@ -1,19 +1,5 @@
 # Network Log ETL Platform - 데이터 흐름 및 NiFi 설계 문서
 
-## 0. Current Status & Roadmap (현재 진행 상황 및 로드맵)
-
-### Completed (현재 완료 단계)
-- [x] **Log Generation**: 파이썬 기반의 가짜 네트워크 로그 생성기(`generator/src/main.py`) 개발 완료.
-- [x] **Ingestion Verification**: NiFi의 `ListenTCP` 프로세서를 사용해 TCP 포트(7070)를 열고, 전송되는 Raw 텍스트 로그를 정상 수신하여 파일(`PutFile`)로 생성 검증 완료.
-
-### Next Steps (차기 개발 단계)
-- [ ] **Log Parsing & Schema Application**: 정규표현식(`ExtractText`)을 적용해 수신된 로그의 항목별 속성 추출.
-- [ ] **JSON Conversion**: 추출한 FlowFile 속성들을 깔끔한 JSON 형태의 본문으로 직렬화(`AttributesToJSON`).
-- [ ] **RDBMS Load**: JDBC 연동 및 DBCP Connection Pool 서비스를 활용하여 수집 데이터를 MySQL에 실시간 고속 적재(`PutDatabaseRecord`).
-- [ ] **Batch Analytics DAG**: MySQL의 Raw 데이터를 에어플로우를 통해 집계/분석하여 Data Mart 적재 처리 DAG 개발.
-
----
-
 ## 1. 시스템 전체 아키텍처 (System Architecture)
 
 ```text

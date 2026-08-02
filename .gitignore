@@ -38,3 +38,18 @@ Thumbs.db
 *.swp
 *~
 .history/
+
+# --- Airflow 관련 ---
+# Airflow가 실행되면서 자체적으로 쌓는 로컬 로그 폴더
+airflow/logs/
+
+# Airflow 웹서버/스케줄러가 임시로 사용하는 PID 및 소켓 파일
+airflow/*.pid
+airflow/*.lock
+
+# 파이썬 컴파일 파일 및 캐시
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/

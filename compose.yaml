@@ -34,6 +34,13 @@ services:
     volumes:
       # 내 컴퓨터의 jar 파일을 컨테이너의 /tmp로 연결
       - ./mysql-connector-j-8.3.0.jar:/tmp/mysql-connector-j-8.3.0.jar
+      # NiFi의 캔버스 상태와 설정 영구 저장
+      - nifi-conf:/opt/nifi/nifi-current/conf
+      - nifi-state:/opt/nifi/nifi-current/state
+      - nifi-database:/opt/nifi/nifi-current/database_repository
+      - nifi-flowfile:/opt/nifi/nifi-current/flowfile_repository
+      - nifi-content:/opt/nifi/nifi-current/content_repository
+      - nifi-provenance:/opt/nifi/nifi-current/provenance_repository
 
     environment:
       SINGLE_USER_CREDENTIALS_USERNAME: ${NIFI_USERNAME}
@@ -71,15 +78,92 @@ services:
 
     restart: unless-stopped
 
+  #-------------------------------------------------------#
 
+  # 1. Airflow 메타데이터용 DB (PostgreSQL)
+  postgres-airflow:
+    image: postgres:13
+    container_name: ${PROJECT_NAME}-postgres-airflow
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    networks:
+      - network-platform
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # 2. Airflow 초기 셋팅 (최초 1회 실행 후 종료됨)
+  airflow-init:
+    image: apache/airflow:2.7.3
+    container_name: ${PROJECT_NAME}-airflow-init
+    depends_on:
+      - postgres-airflow
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres-airflow/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=admin # Airflow 웹 로그인 ID
+      - _AIRFLOW_WWW_USER_PASSWORD=admin # Airflow 웹 로그인 PW
+    command: version
+    networks:
+      - network-platform
+
+  # 3. Airflow 웹 UI (포트 8080)
+  airflow-webserver:
+    image: apache/airflow:2.7.3
+    container_name: ${PROJECT_NAME}-airflow-webserver
+    depends_on:
+      - postgres-airflow
+      - airflow-init
+    restart: unless-stopped
+    ports:
+      - "8080:8080" 
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres-airflow/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+    command: webserver
+    networks:
+      - network-platform
+
+  # 4. Airflow 스케줄러
+  airflow-scheduler:
+    image: apache/airflow:2.7.3
+    container_name: ${PROJECT_NAME}-airflow-scheduler
+    depends_on:
+      - postgres-airflow
+      - airflow-init
+    restart: unless-stopped
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres-airflow/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+    command: scheduler
+    networks:
+      - network-platform
 
 networks:
-
   network-platform:
     driver: bridge
 
-
-
 volumes:
-
   mysql-data:
+  postgres-data: # Airflow 메타데이터 DB 볼륨 추가
+  # NiFi 볼륨
+  nifi-conf:
+  nifi-state:
+  nifi-database:
+  nifi-flowfile:
+  nifi-content:
+  nifi-provenance:

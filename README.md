@@ -122,7 +122,7 @@ MYSQL_PASSWORD=YourUserPasswordHere
 통합 서비스들을 한 번에 실행하기 위해 프로젝트 루트에서 백그라운드 모드로 컴포즈 명령을 실행합니다.
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 이후 아래 명령어로 모든 컴포넌트가 안정적으로 구동되었는지 검증합니다:
 ```bash
